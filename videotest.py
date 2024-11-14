@@ -1,12 +1,12 @@
-import os
-import cv2
+import os,__future__,os,cv2,math,multiprocessing
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import mediapipe as mp
 import tkinter as tk
-from tkinter import messagebox
-import math 
+from tkinter import *
+from tkinter import messagebox,Variable, filedialog,Canvas,ttk
+from tkinter.ttk import *
 
 
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
@@ -72,7 +72,8 @@ class hand:
         else:
             return ''
 
-def main(file_path,save_path,file_name):
+def video_converter(file_path,save_path,file_name):
+    global video_is_done
     save_path = save_path + "/" + file_name + '.mp4'
     print(file_path)
     print(save_path)
@@ -135,13 +136,42 @@ def main(file_path,save_path,file_name):
                             frame[y_min:y_max, x_min:x_max] = mosaic    # 馬賽克區域
                         else:
                             cv2.putText(frame, text, (30,120), fontFace, 5, (255,255,255), 10, lineType) # 印出文字
+            
             out.write(frame)
-            cv2.imshow('bob', frame)
-            if cv2.waitKey(5) == ord('q'):
-                break
+            # cv2.imshow('bob', frame)
+            # if cv2.waitKey(5) == ord('q'):
+            #     break
+            
 
 
     cap.release()
     out.release()
     messagebox.showinfo('showinfo', '輸出完成')
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
+    
+    video_is_done = True
+
+def progress():
+    update = Toplevel()
+    update.title('AI Mosaic')
+    update.geometry('320x140')
+    bar = ttk.Progressbar(update)
+    bar.pack(pady=20)
+    label = tk.Label(update, text='Processing...')
+    label.pack()
+    bar.start()
+    update.mainloop()
+        
+    
+
+    
+
+def main(file_path,save_path,file_name):
+    task1 = multiprocessing.Process(target=video_converter,args=(file_path, save_path, file_name))
+    task2 = multiprocessing.Process(target=progress)
+    
+    task1.start()
+    task2.start()
+    
+    task1.join()
+    task2.join()

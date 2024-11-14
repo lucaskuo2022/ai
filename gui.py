@@ -1,13 +1,14 @@
 import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-from tkinter import font
+from tkinter import filedialog,messagebox,font,ttk
 from tkinter import *
+from tkinter.ttk import *
+from pathlib import Path 
 import camera
 import videotest
 
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 root = tk.Tk()
 root.title('AI masiac')
 root.geometry('800x600')  # 尺寸
@@ -15,21 +16,37 @@ root.resizable(width=0, height=0) # 決定能用滑鼠拖曳來改變多少的�
 file_path=r''
 save_path=r''
 
+style = ttk.Style()
+style.configure('TButton',font=('calibri',25,'bold'),borderwidth = '16')
+style.map('TButton',foreground = [('active','!disabled','green')],
+                    background = [('active','black')])
+
 
 def main():
   
   def read():
     global file_path
     file_path = filedialog.askopenfilename()   # 選擇檔案後回傳檔案路徑與名稱
-    label5['text'] = file_path
+    read_file_name = file_path
+    read_file_name_lst = read_file_name.split('/')
+    label5['text'] = read_file_name_lst[-1]
+    #print(read_file_name_lst[-1])
     #print(file_path)
-
 
   def save():
     global save_path
     save_path = filedialog.askdirectory()
     label6['text'] = save_path
     #print(save_path)
+    
+  def open():
+    p = Path(save_path)
+    p.resolve()
+    print(p)
+    os.system(f"explorer {p} ")
+  
+  
+  
   file_name = ''
   name = tk.Entry(root, textvariable=file_name)
   name.grid(row=3,column=2)  # 放入 Entry
@@ -55,19 +72,21 @@ def main():
   label7 = tk.Label(root,font=('標楷體',20,),wraplength=800,text='請輸入你要存檔的檔名')  # 建立 label 標籤
   label7.grid(row=3,column=0,columnspan=1)
 
-  openfiles = tk.Button(text='開啟檔案',font=('標楷體',20,'bold'),command=read,height=1, width=12)  # Button 設定 command 參數，點擊按鈕時執行 show 函式
+  openfiles = ttk.Button(text='開啟檔案',command=read,style='TButton')  # Button 設定 command 參數，點擊按鈕時執行 show 函式
   openfiles.grid(row=4,column=0)
-  #padx = 100,pady = 100
 
-  savefiles = tk.Button(text='儲存檔案於',font=('標楷體',20,'bold'),command=save,height=1, width=12)  # Button 設定 command 參數，點擊按鈕時執行 show 函式
+  savefiles = ttk.Button(text='儲存檔案於',command=save,style='TButton')  # Button 設定 command 參數，點擊按鈕時執行 show 函式
   savefiles.grid(row=4,column=1)
-  #padx = 100,pady = 100
+  
+  openvideo = ttk.Button(root,text='打開檔案位置',command=open,style='TButton')  # Button 設定 command 參數，點擊按鈕時執行 show 函式
+  openvideo.grid(row=5,column=2)
 
-  magic = tk.Button(text='輸出',font=('標楷體',20,'bold'),command=lambda:videotest.main(file_path,save_path,name.get()),height=1, width=12)  # Button 設定 command 參數，點擊按鈕時執行 show 函式
+
+  magic = ttk.Button(text='輸出',command=lambda:videotest.main(file_path,save_path,name.get()),style='TButton')  # Button 設定 command 參數，點擊按鈕時執行 show 函式
   magic.grid(row=4,column=2)
 
-  cam = tk.Button(text='使用你的鏡頭',font=('標楷體',20,'bold'),command=camera.main,height=1, width=12,)  # Button 設定 command 參數，點擊按鈕時執行 show 函式
-  cam.grid(row=6,column=1)
+  cam = ttk.Button(text='使用你的鏡頭',command=camera.main,style='TButton')  # Button 設定 command 參數，點擊按鈕時執行 show 函式
+  cam.grid(row=7,column=1)
 
 
   root.mainloop()
